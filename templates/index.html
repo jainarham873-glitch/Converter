@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SoundFlux — Ultimate Link to MP3 & MP4 Converter</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Main Stylesheet (Clean Emerald & Obsidian - NO PURPLE GRADIENTS) -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <!-- Ambient background glow (strictly emerald/cyan/dark slate) -->
+  <div class="ambient-glow glow-emerald"></div>
+  <div class="ambient-glow glow-cyan"></div>
+
+  <div class="app-wrapper">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">
+          <i data-lucide="disc-3"></i>
+        </div>
+        <div class="brand-text">
+          <h1>SOUND<span>FLUX</span></h1>
+          <p class="tagline">LINK TO MP3 & MP4 STUDIO CONVERTER</p>
+        </div>
+      </div>
+      <div class="status-indicator">
+        <span class="status-dot"></span>
+        <span class="status-text">Audio Engine Ready</span>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-card">
+      <div class="hero-section">
+        <h2 class="hero-title">Paste Any Link. Get Studio <span class="highlight-text">MP3 or MP4</span>.</h2>
+        <p class="hero-subtitle">Convert video or audio from YouTube, SoundCloud, Twitter/X, Instagram, or direct web links into pristine MP3 audio or MP4 video.</p>
+      </div>
+
+      <!-- Format Mode Selector Tabs (MP3 vs MP4) -->
+      <div class="format-switcher-bar">
+        <div class="format-tabs">
+          <button type="button" id="tab-mp3" class="format-tab active" onclick="setFormat('mp3')">
+            <i data-lucide="music-2"></i>
+            <span>Audio (MP3)</span>
+          </button>
+          <button type="button" id="tab-mp4" class="format-tab" onclick="setFormat('mp4')">
+            <i data-lucide="video"></i>
+            <span>Video (MP4)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Conversion Form -->
+      <form id="convert-form" class="convert-box" onsubmit="event.preventDefault(); startConvert();">
+        <div class="input-group">
+          <div class="input-icon">
+            <i data-lucide="link"></i>
+          </div>
+          <input 
+            type="url" 
+            id="url-input" 
+            placeholder="Paste media link here (e.g. YouTube, SoundCloud, Twitter/X, direct link)..." 
+            required 
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <div class="input-actions">
+            <button type="button" id="btn-paste" class="btn-icon" title="Paste from clipboard" onclick="pasteClipboard()">
+              <i data-lucide="clipboard-copy"></i>
+              <span class="btn-text">Paste</span>
+            </button>
+            <button type="button" id="btn-clear" class="btn-icon" title="Clear input" onclick="clearInput()">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Quality & Controls Bar -->
+        <div class="controls-bar">
+          <!-- MP3 Bitrate Options -->
+          <div id="quality-selector-mp3" class="quality-selector">
+            <span class="selector-label"><i data-lucide="sliders"></i> Bitrate:</span>
+            <div class="bitrate-options">
+              <label class="bitrate-option">
+                <input type="radio" name="bitrate" value="320" checked>
+                <span class="pill">320 kbps <small>Studio</small></span>
+              </label>
+              <label class="bitrate-option">
+                <input type="radio" name="bitrate" value="256">
+                <span class="pill">256 kbps <small>High</small></span>
+              </label>
+              <label class="bitrate-option">
+                <input type="radio" name="bitrate" value="192">
+                <span class="pill">192 kbps <small>Standard</small></span>
+              </label>
+              <label class="bitrate-option">
+                <input type="radio" name="bitrate" value="128">
+                <span class="pill">128 kbps <small>Compact</small></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- MP4 Resolution Options -->
+          <div id="quality-selector-mp4" class="quality-selector hidden">
+            <span class="selector-label"><i data-lucide="monitor"></i> Quality:</span>
+            <div class="bitrate-options">
+              <label class="bitrate-option">
+                <input type="radio" name="resolution" value="1080" checked>
+                <span class="pill">1080p <small>FHD</small></span>
+              </label>
+              <label class="bitrate-option">
+                <input type="radio" name="resolution" value="720">
+                <span class="pill">720p <small>HD</small></span>
+              </label>
+              <label class="bitrate-option">
+                <input type="radio" name="resolution" value="480">
+                <span class="pill">480p <small>SD</small></span>
+              </label>
+              <label class="bitrate-option">
+                <input type="radio" name="resolution" value="best">
+                <span class="pill">Max <small>Source</small></span>
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" id="btn-convert" class="btn-primary">
+            <i data-lucide="sparkles"></i>
+            <span id="btn-convert-label">Convert to MP3</span>
+          </button>
+        </div>
+      </form>
+
+      <!-- Preview Card (When fetching details) -->
+      <div id="media-preview" class="media-preview hidden">
+        <div class="preview-thumb-wrap">
+          <img id="preview-thumb" src="" alt="Thumbnail">
+          <span id="preview-duration" class="preview-badge">--:--</span>
+        </div>
+        <div class="preview-info">
+          <h4 id="preview-title">Title preview loading...</h4>
+          <p id="preview-channel"><i data-lucide="user"></i> <span>Channel</span></p>
+        </div>
+      </div>
+
+      <!-- Processing Status Box -->
+      <div id="progress-container" class="progress-container hidden">
+        <div class="progress-header">
+          <div class="progress-status">
+            <div class="spinner-pulse"></div>
+            <span id="progress-status-text">Analyzing & extracting stream...</span>
+          </div>
+          <span id="progress-percent" class="progress-percent">0%</span>
+        </div>
+
+        <!-- Animated Progress Track -->
+        <div class="progress-track">
+          <div id="progress-bar-fill" class="progress-bar-fill" style="width: 0%;"></div>
+        </div>
+
+        <div class="progress-meta">
+          <span><i data-lucide="zap"></i> Speed: <strong id="progress-speed">--</strong></span>
+          <span><i data-lucide="clock"></i> ETA: <strong id="progress-eta">--</strong></span>
+        </div>
+      </div>
+
+      <!-- Error Alert Box -->
+      <div id="error-box" class="error-box hidden">
+        <i data-lucide="alert-triangle"></i>
+        <div class="error-content">
+          <h4>Conversion Failed</h4>
+          <p id="error-message">An error occurred while fetching the link.</p>
+        </div>
+        <button type="button" class="btn-close-error" onclick="hideError()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <!-- Success & Player Box -->
+      <div id="result-box" class="result-box hidden">
+        <div class="result-badge">
+          <i data-lucide="check-circle-2"></i> Ready for Download & Playback
+        </div>
+
+        <div class="result-details">
+          <div class="result-meta">
+            <h3 id="result-title">Converted Media File</h3>
+            <div class="result-tags">
+              <span id="result-format-tag" class="tag"><i data-lucide="file-audio"></i> MP3</span>
+              <span id="result-quality-tag" class="tag"><i data-lucide="gauge"></i> 320 kbps</span>
+              <span id="result-size-tag" class="tag"><i data-lucide="hard-drive"></i> -- MB</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- In-Page Audio Player (For MP3) -->
+        <div id="audio-player-card" class="audio-player-card">
+          <div class="player-top">
+            <div class="wave-visualizer">
+              <span class="bar"></span>
+              <span class="bar"></span>
+              <span class="bar"></span>
+              <span class="bar"></span>
+              <span class="bar"></span>
+              <span class="bar"></span>
+              <span class="bar"></span>
+              <span class="bar"></span>
+              <span class="bar"></span>
+              <span class="bar"></span>
+            </div>
+            <div class="time-display">
+              <span id="audio-current">0:00</span> / <span id="audio-duration">0:00</span>
+            </div>
+          </div>
+
+          <audio id="main-audio" preload="metadata"></audio>
+
+          <div class="player-controls">
+            <button type="button" id="btn-play-pause" class="btn-player-action" onclick="togglePlayAudio()">
+              <i id="play-icon" data-lucide="play"></i>
+            </button>
+            <input type="range" id="audio-seek" class="audio-seek" min="0" max="100" value="0">
+            <div class="volume-box">
+              <i data-lucide="volume-2"></i>
+              <input type="range" id="audio-volume" class="audio-volume" min="0" max="1" step="0.05" value="1">
+            </div>
+          </div>
+        </div>
+
+        <!-- In-Page Video Player (For MP4) -->
+        <div id="video-player-card" class="video-player-card hidden">
+          <video id="main-video" controls class="video-preview-player" preload="metadata"></video>
+        </div>
+
+        <!-- Download Buttons -->
+        <div class="result-actions">
+          <a id="download-link" href="#" class="btn-download" download>
+            <i data-lucide="download"></i>
+            <span id="btn-download-label">Download MP3</span>
+          </a>
+          <button type="button" id="btn-copy-link" class="btn-secondary" onclick="copyDownloadLink()">
+            <i data-lucide="copy"></i>
+            <span>Copy Direct Link</span>
+          </button>
+          <button type="button" class="btn-tertiary" onclick="resetToNew()">
+            <i data-lucide="rotate-ccw"></i>
+            <span>Convert Another</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Supported Formats & Platforms -->
+      <div class="supported-platforms">
+        <span class="platforms-label">Powered to extract & convert from:</span>
+        <div class="platform-tags">
+          <span class="platform-tag"><i data-lucide="video"></i> YouTube</span>
+          <span class="platform-tag"><i data-lucide="music-2"></i> SoundCloud</span>
+          <span class="platform-tag"><i data-lucide="twitter"></i> Twitter / X</span>
+          <span class="platform-tag"><i data-lucide="instagram"></i> Instagram</span>
+          <span class="platform-tag"><i data-lucide="play-circle"></i> Vimeo</span>
+          <span class="platform-tag"><i data-lucide="file-video"></i> Direct Web Video/Audio</span>
+        </div>
+      </div>
+    </main>
+
+    <!-- Session History Section -->
+    <section class="history-section">
+      <div class="history-header">
+        <div class="history-title">
+          <i data-lucide="history"></i>
+          <h3>Recent Conversions in this Session</h3>
+        </div>
+        <button type="button" class="btn-clear-history" onclick="clearHistory()">Clear History</button>
+      </div>
+
+      <div id="history-list" class="history-list">
+        <div class="history-empty">
+          <i data-lucide="inbox"></i>
+          <p>No conversions yet in this session. Converted media will appear here for fast re-downloading.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>SoundFlux Studio &bull; High-Fidelity MP3 & MP4 Media Extractor</p>
+    </footer>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+  <script>
+    // Initialize icons
+    lucide.createIcons();
+  </script>
+</body>
+</html>
